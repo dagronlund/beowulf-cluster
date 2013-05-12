@@ -1,1 +1,6 @@
 /ClientServer/nbproject/private/
+/ClientServer/build/
+/UserProgram/nbproject/private/
+/UserProgram/build/
+/ClientServer/dist/
+/UserProgram/dist/
