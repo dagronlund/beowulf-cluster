@@ -16,6 +16,8 @@ import java.util.logging.Logger;
 public class Server {
     int port;
     
+    ServerMain.Server bigBrother = new ServerMain.Server();
+    
     public Server(){
         port = 1234;
         bootup();
@@ -42,7 +44,7 @@ public class Server {
             Scanner in = new Scanner(sk.getInputStream());
             PrintWriter out = new PrintWriter(sk.getOutputStream(), true);
             OutputStream os = sk.getOutputStream();
-            
+            bigBrother.addSlave(sk.getInetAddress().getHostName(), sk.getInetAddress().getHostAddress());
             return 1;
 //            String s = in.nextLine();
 //            System.out.println("Server recv: " + s);

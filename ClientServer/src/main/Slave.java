@@ -2,11 +2,9 @@ package main;
 
 import java.awt.Toolkit;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -45,6 +43,8 @@ public class Slave {
             Socket sk = new Socket(InetAddress.getByName(address), port);
             Scanner in = new Scanner(sk.getInputStream());
             PrintWriter out = new PrintWriter(sk.getOutputStream(), true);
+            SlaveMain.Slave sla = new SlaveMain.Slave();
+            sla.MASTER(address);
             Toolkit.getDefaultToolkit().beep();
             return 1;
         } catch (ConnectException ce) {
