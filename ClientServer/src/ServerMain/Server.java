@@ -25,4 +25,19 @@ public class Server {
         }
         return ret;
     }
+    
+    public int getIndexOfSlave(Slave s){
+        int ret = -1;
+        for(int i = 0; i<slaves.size(); i++){
+            if(slaves.get(i).equals(s))
+                ret = i;
+        }
+        return ret;
+    }
+    
+    public String returnSlave(Slave s){
+        int ind = getIndexOfSlave(s);
+        return slaves.get(ind).getHostName() + "  at  " + slaves.get(ind).getAddress() 
+                    + "  with  " + slaves.get(ind).getAmountOfTasks() + " tasks.";
+    }
 }
