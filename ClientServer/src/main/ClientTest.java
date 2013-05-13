@@ -19,7 +19,7 @@ public class ClientTest {
     public static void main(String[] args) {
         System.out.println("Client Running");
         try {
-            Socket sk = new Socket(InetAddress.getByName("192.168.1.19"), PORT);
+            Socket sk = new Socket(InetAddress.getByName("localhost"), PORT);
             Scanner in = new Scanner(sk.getInputStream());
             PrintWriter out = new PrintWriter(sk.getOutputStream(), true);
 
