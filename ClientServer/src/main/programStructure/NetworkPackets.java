@@ -3,6 +3,7 @@ package main.programStructure;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -38,14 +39,14 @@ public class NetworkPackets {
             write(out, data.get(key));
         }
     }
-    
+
     public void receive(InputStream in) {
         Packet p = read(in);
         while (p != null) {
             data.put(p.getKey(), p);
             p = read(in);
         }
-    } 
+    }
 
     private void write(OutputStream out, Packet data) {
         try {
@@ -83,7 +84,8 @@ public class NetworkPackets {
                     return new DataPacket(new String(key), bytes);
                 }
             }
-
+        } catch (SocketException ex) {
+            return null;
         } catch (IOException ex) {
             Logger.getLogger(NetworkPackets.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import main.programStructure.NetworkPackets;
 
 /**
  * @author David Gronlund
@@ -21,15 +22,10 @@ public class ServerTest {
         try {
             ServerSocket ssk = new ServerSocket(PORT);
             Socket sk = ssk.accept();
-            Scanner in = new Scanner(sk.getInputStream());
-            PrintWriter out = new PrintWriter(sk.getOutputStream(), true);
-            OutputStream os = sk.getOutputStream();
             
-            
-            String s = in.nextLine();
-            System.out.println("Server recv: " + s);
-            out.println(s);
-            System.out.println("Server Success");
+            NetworkPackets packets = new NetworkPackets();
+            packets.receive(sk.getInputStream());
+            System.out.println(packets.getPacket("Hello").getData()[0]);
         } catch (IOException ex) {
             Logger.getLogger(ServerTest.class.getName()).log(Level.SEVERE, null, ex);
         }
