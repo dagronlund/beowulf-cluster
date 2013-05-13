@@ -3,7 +3,7 @@ package main.programStructure;
 /**
  * @author David Gronlund
  */
-public interface SerializableData {
+public interface Packet {
     
     public int TYPE_BYTE_ARRAY = 1;
     
