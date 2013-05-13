@@ -53,7 +53,7 @@ public class Server {
 //            out.println(s);
 //            System.out.println("Server Success");
         } catch (IOException ex) {
-            Logger.getLogger(ServerTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             return 0;
         }
     }
