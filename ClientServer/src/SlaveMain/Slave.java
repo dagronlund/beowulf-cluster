@@ -9,4 +9,12 @@ import main.programStructure.Task;
  */
 public class Slave {
     ArrayList<Task> taskList = new ArrayList<Task>();
+    Server master;
+    public Slave(){
+        
+    }
+    
+    public void MASTER(String ad){
+        master = new Server(ad);
+    }
 }
