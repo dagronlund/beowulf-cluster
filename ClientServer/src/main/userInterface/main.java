@@ -4,6 +4,9 @@
  */
 package main.userInterface;
 
+import main.Server;
+import main.Slave;
+
 /**
  *
  * @author abell
@@ -13,6 +16,7 @@ public class main {
     public static void ser(String[] args){
         try{
             int port = Integer.parseInt(args[2]);
+            Server ser = new Server(port);
         } catch(java.lang.NumberFormatException ex) {
             System.out.println("Crap! That's not a port! " + ex);
         }
@@ -22,6 +26,7 @@ public class main {
         try{
         String ip = args[2].split(":")[0];
         int port = Integer.parseInt(args[2].split(":")[1]);
+        Slave sla = new Slave(ip, port);
         } catch(java.lang.NumberFormatException ex) {
             System.out.println("Crap! That's not a number! " + ex);
         }
@@ -41,7 +46,7 @@ public class main {
         try {
             if(args.length == 0 || args == null){
                 System.out.println("This assumes \"lchs-b sla localhost:1234\"\nIf you don't want this, use \"lchs-b help\"");
-                
+                Server ser = new Server();
             }
             if (args[0].toUpperCase().equals("SLA") && args.length > 2) {
                 if (args[1].toUpperCase().equals("H") || args[1].toUpperCase().equals("HELP") || args[1].toUpperCase().equals("?")){
