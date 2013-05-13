@@ -19,7 +19,7 @@ public class Main {
         Class userProgramClass;
         UserProgram user = null;
         try {
-            userProgramClass = loader.loadClass("F:/Comp Sci/beowulf-cluster/UserProgram/build/classes/test/" +
+            userProgramClass = loader.loadClass("../UserProgram/build/classes/test/" +
                     "ProgramTest.class");
             user = (UserProgram) userProgramClass.getConstructor(Main.class).newInstance(new Main());
         } catch (ClassNotFoundException ex) {
