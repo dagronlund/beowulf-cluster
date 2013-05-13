@@ -1,17 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package testing;
+
+import java.awt.Toolkit;
 
 /**
  *
- * @author Adam Bell
+ * @author abell
  */
 public class beep_test {
     public static void main(String[] args){
-        while(true){
-//            java.awt
-        }
+//        while(true){
+        Toolkit.getDefaultToolkit().beep();
+//        }
     }
 }

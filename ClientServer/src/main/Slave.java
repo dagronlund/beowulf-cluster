@@ -1,9 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package main;
 
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -48,6 +45,7 @@ public class Slave {
             Socket sk = new Socket(InetAddress.getByName(address), port);
             Scanner in = new Scanner(sk.getInputStream());
             PrintWriter out = new PrintWriter(sk.getOutputStream(), true);
+            Toolkit.getDefaultToolkit().beep();
             return 1;
         } catch (ConnectException ce) {
             System.out.println("No server found at that ip.");
