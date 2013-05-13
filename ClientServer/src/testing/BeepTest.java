@@ -1,4 +1,3 @@
-
 package testing;
 
 import java.awt.Toolkit;
@@ -7,10 +6,9 @@ import java.awt.Toolkit;
  *
  * @author abell
  */
-public class beep_test {
-    public static void main(String[] args){
-//        while(true){
+public class BeepTest {
+
+    public static void main(String[] args) {
         Toolkit.getDefaultToolkit().beep();
-//        }
     }
 }
