@@ -1,1 +1,3 @@
-Who u looking at foo? -Vitra Hross
+program.mainProgram = "main.Main" 
+program.task.something = "main.something.Beanz"
+program.task.somethingElse = "main.something.CrazyBeanz"
