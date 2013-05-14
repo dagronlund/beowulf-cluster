@@ -8,13 +8,13 @@ public class ServerToSlaveAdministration {
     /*
      * 
      */
-    ServerMain.Server BigBrother = new ServerMain.Server();
+    server.ServerProgram BigBrother = new server.ServerProgram();
     
     public String getSlaves(){
         return BigBrother.returnSlaves();
     }
     
-    public String getSlave(ServerMain.Slave s){
+    public String getSlave(server.Slave s){
         return BigBrother.returnSlave(s);
     }
 }

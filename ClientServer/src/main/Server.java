@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 public class Server {
     int port;
     
-    ServerMain.Server bigBrother = new ServerMain.Server();
+    server.ServerProgram bigBrother = new server.ServerProgram();
     
     public Server(){
         port = 1234;

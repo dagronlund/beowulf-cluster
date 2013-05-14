@@ -43,7 +43,7 @@ public class Slave {
             Socket sk = new Socket(InetAddress.getByName(address), port);
             Scanner in = new Scanner(sk.getInputStream());
             PrintWriter out = new PrintWriter(sk.getOutputStream(), true);
-            SlaveMain.Slave sla = new SlaveMain.Slave();
+            slave.SlaveProgram sla = new slave.SlaveProgram();
             sla.MASTER(address);
             Toolkit.getDefaultToolkit().beep();
             return 1;
