@@ -20,7 +20,6 @@ public class ServerProgram {
         @Override
         public void run() {
             while (true) {
-                refreshSlaves();
                 try {
                     Socket sk = serverSocket.accept();
                     System.out.println("Slave found");
@@ -37,16 +36,16 @@ public class ServerProgram {
         slaves = new ArrayList<Slave>();
         listener.start();
     }
-    
+
     private void refreshSlaves() {
         for (int i = 0; i < slaves.size(); i++) {
-            if (slaves.get(i).getConnection().isClosed()) {
-                slaves.remove(i);
-                System.out.println("slave lost");
-                i--;
-            } else {
-                System.out.println("slave operating");
-            }
+//            if (!slaves.get(i).getConnection().) {
+//                slaves.remove(i);
+//                System.out.println("slave lost");
+//                i--;
+//            } else {
+//                System.out.println("slave operating");
+//            }
         }
     }
 
@@ -66,11 +65,15 @@ public class ServerProgram {
         }
         return null;
     }
-    
+
     public static void main(String[] args) throws IOException {
         ServerProgram program = new ServerProgram();
         System.out.println("Here");
         while (true) {
+            for (Slave slave : program.slaves) {
+                System.out.println("slave: " + slave.getAddress());
+            }
+            program.refreshSlaves();
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException ex) {

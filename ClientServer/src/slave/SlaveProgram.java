@@ -28,11 +28,11 @@ public class SlaveProgram {
         socket.getInputStream().read(idBytes);
         id = (idBytes[0] << 24) | (idBytes[1] << 16) | (idBytes[2] << 8) | idBytes[3];
     }
-    
+
     public int getID() {
         return id;
     }
-    
+
     public static void main(String[] args) throws IOException {
         SlaveProgram program = new SlaveProgram(new Scanner(System.in).next());
     }

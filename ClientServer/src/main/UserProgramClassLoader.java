@@ -34,7 +34,7 @@ public class UserProgramClassLoader extends ClassLoader {
             }
             in.close();
             byte[] classData = b.toByteArray();
-            return defineClass("test.ProgramTest", classData, 0, classData.length);
+            return defineClass("test.otherTest.ProgramTest", classData, 0, classData.length);
         } catch (MalformedURLException ex) {
             Logger.getLogger(UserProgramClassLoader.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

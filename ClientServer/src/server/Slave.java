@@ -56,7 +56,7 @@ public class Slave {
         }
         return ret;
     }
-    
+
     @Override
     public String toString() {
         return Integer.toString(id);

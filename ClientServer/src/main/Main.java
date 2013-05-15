@@ -23,8 +23,8 @@ public class Main {
         Class userProgramClass;
         UserProgram user = null;
         try {
-            userProgramClass = loader.loadClass("../UserProgram/build/classes/test/" +
-                    "ProgramTest.class");
+            userProgramClass = loader.loadClass("../UserProgram/build/classes/test/otherTest/"
+                    + "ProgramTest.class");
             user = (UserProgram) userProgramClass.getConstructor(Main.class).newInstance(new Main());
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
@@ -39,7 +39,7 @@ public class Main {
         }
         user.run();
     }
-    
+
     public Map<String, Object> submitTask(Task task) {
         return null;
     }

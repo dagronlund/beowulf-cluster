@@ -14,7 +14,7 @@ import main.programStructure.NetworkPackets;
  * @author David Gronlund
  */
 public class ServerTest {
-    
+
     public static final int PORT = 1235;
 
     public static void main(String[] args) {
@@ -22,7 +22,7 @@ public class ServerTest {
         try {
             ServerSocket ssk = new ServerSocket(PORT);
             Socket sk = ssk.accept();
-            
+
             NetworkPackets packets = new NetworkPackets();
             packets.receive(sk.getInputStream());
             System.out.println(packets.getPacket("Hello").getData()[0]);

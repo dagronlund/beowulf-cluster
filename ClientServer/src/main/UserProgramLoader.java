@@ -16,35 +16,45 @@ import java.util.zip.ZipInputStream;
 public class UserProgramLoader {
 
     private File file;
-    private String registry;
     private String mainProgram;
     private Map<String, String> tasks;
 
-    public UserProgramLoader(String location) throws FileNotFoundException, IOException {
+    public UserProgramLoader(String location)
+            throws FileNotFoundException, IOException {
         file = new File(location);
         tasks = new HashMap<String, String>();
-        byte[] reg = findFile("registry.dat", file);
-        registry = new String(reg);
-        readRegistry(registry);
-        System.out.println(mainProgram);
-        for (String key : tasks.keySet()) {
-            System.out.println(key + ", " + tasks.get(key));
-        }
+        byte[] reg = findFile("registry.dat");
+        readRegistry(new String(reg));
     }
-    
+
     private void readRegistry(String registry) {
         Scanner scan = new Scanner(registry);
         while (scan.hasNextLine()) {
             String line = cleanString(scan.nextLine());
             if (line.startsWith("program.mainProgram")) {
-                mainProgram = line.replaceAll("program.mainProgram=", "").replace("\"", "");
+                mainProgram = line.replaceAll("program.mainProgram=", "").
+                        replace("\"", "");
             } else if (line.startsWith("program.task.")) {
-                tasks.put(line.replaceFirst("program.task.", "").substring(0, line.replaceFirst("program.task.", "").indexOf("=")), 
-                        line.substring(line.indexOf("=") + 1).replace("\"", ""));
+                tasks.put(line.replaceFirst("program.task.", "").
+                        substring(0, line.replaceFirst("program.task.", "").
+                        indexOf("=")),
+                        line.substring(line.indexOf("=") + 1).
+                        replace("\"", ""));
             }
         }
     }
-    
+
+    public String getMainProgram() {
+        return mainProgram.replace(".", "/") + ".class";
+    }
+
+    public String getTask(String taskID) {
+        if (tasks.containsKey(taskID)) {
+            return tasks.get(taskID).replace(".", "/") + ".class";
+        }
+        return null;
+    }
+
     private String cleanString(String s) {
         s = s.trim();
         boolean inQuote = false;
@@ -58,13 +68,13 @@ public class UserProgramLoader {
         }
         return s;
     }
-    
-    private byte[] findFile (String location, File f) throws IOException {
-        ZipInputStream zipFile = new ZipInputStream(new FileInputStream(f));
+
+    public final byte[] findFile(String location) throws IOException {
+        ZipInputStream zipFile = new ZipInputStream(new FileInputStream(file));
         ZipEntry entry;
         while ((entry = zipFile.getNextEntry()) != null) {
             if (entry.getName().equals(location)) {
-                byte[] data = new byte[(int)entry.getSize()];
+                byte[] data = new byte[(int) entry.getSize()];
                 zipFile.read(data);
                 return data;
             }
@@ -72,7 +82,9 @@ public class UserProgramLoader {
         return null;
     }
 
-    public static void main(String[] args) throws FileNotFoundException, IOException {
-        UserProgramLoader temp = new UserProgramLoader("../UserProgram/dist/UserProgram.jar");
+    public static void main(String[] args)
+            throws FileNotFoundException, IOException {
+        UserProgramLoader temp =
+                new UserProgramLoader("../UserProgram/dist/UserProgram.jar");
     }
 }
