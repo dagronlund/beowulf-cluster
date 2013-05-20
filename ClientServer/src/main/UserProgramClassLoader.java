@@ -1,40 +1,42 @@
 package main;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import main.programStructure.Util;
 
 /**
  * @author David Gronlund
  */
 public class UserProgramClassLoader extends ClassLoader {
+    
+    private String classQualifier;
 
-    public UserProgramClassLoader(ClassLoader parent) {
+    public UserProgramClassLoader(ClassLoader parent, String classQualifier) {
         super(parent);
+        this.classQualifier = classQualifier;
     }
 
     @Override
-    public Class loadClass(String className) throws ClassNotFoundException {
-        System.out.println(className);
-        if (!className.endsWith("ProgramTest.class")) {
-            return super.loadClass(className);
+    public Class loadClass(String classLoc) throws ClassNotFoundException {
+        //Neeeeeed to fix this
+        System.out.println(this.classQualifier);
+        System.out.println(Util.classLocationToQualifier(classLoc));
+        if (!classQualifier.equals(Util.classLocationToQualifier(classLoc))) {
+            return super.loadClass(classLoc);
         }
+        //
         try {
-            File file = new File(className);
-            FileInputStream in = new FileInputStream(file);
-            ByteArrayOutputStream b = new ByteArrayOutputStream();
-            int data = in.read();
-            while (data != -1) {
-                b.write(data);
-                data = in.read();
-            }
+            File file = new File(classLoc);
+            InputStream in = new FileInputStream(file);
+            byte[] b = new byte[in.available()];
+            in.read(b);
             in.close();
-            byte[] classData = b.toByteArray();
-            return defineClass("test.otherTest.ProgramTest", classData, 0, classData.length);
+            return defineClass(classQualifier, b, 0, b.length);
         } catch (MalformedURLException ex) {
             Logger.getLogger(UserProgramClassLoader.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {

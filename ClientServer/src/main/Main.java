@@ -1,6 +1,5 @@
 package main;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
@@ -16,10 +15,8 @@ import main.programStructure.UserProgram;
 public class Main {
 
     public static void main(String[] args) throws UnknownHostException, IOException {
-//        File file = new File("../UserProgram/build/classes/test/" +
-//                    "ProgramTest.class");
-//        System.out.println(file.isFile());
-        UserProgramClassLoader loader = new UserProgramClassLoader(Main.class.getClassLoader());
+        UserProgramClassLoader loader = new UserProgramClassLoader(Main.class.getClassLoader(),
+                "test.otherTest.ProgramTest");
         Class userProgramClass;
         UserProgram user = null;
         try {

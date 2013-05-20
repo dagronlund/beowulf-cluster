@@ -1,9 +1,12 @@
 package main;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -15,13 +18,24 @@ import java.util.zip.ZipInputStream;
  */
 public class UserProgramLoader {
 
-    private File file;
+    private byte[] file;
     private String mainProgram;
     private Map<String, String> tasks;
 
     public UserProgramLoader(String location)
             throws FileNotFoundException, IOException {
-        file = new File(location);
+        File temp = new File(location);
+        InputStream stream = new FileInputStream(temp);
+        file = new byte[stream.available()];
+        stream.read(file);
+        tasks = new HashMap<String, String>();
+        byte[] reg = findFile("registry.dat");
+        readRegistry(new String(reg));
+    }
+    
+    public UserProgramLoader(byte[] file)
+            throws FileNotFoundException, IOException {
+        this.file = file;
         tasks = new HashMap<String, String>();
         byte[] reg = findFile("registry.dat");
         readRegistry(new String(reg));
@@ -70,7 +84,7 @@ public class UserProgramLoader {
     }
 
     public final byte[] findFile(String location) throws IOException {
-        ZipInputStream zipFile = new ZipInputStream(new FileInputStream(file));
+        ZipInputStream zipFile = new ZipInputStream(new ByteArrayInputStream(file));
         ZipEntry entry;
         while ((entry = zipFile.getNextEntry()) != null) {
             if (entry.getName().equals(location)) {
