@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.programStructure.Network;
+import main.programStructure.Task;
 
 /**
  *
@@ -22,7 +24,6 @@ public class ServerProgram {
             while (true) {
                 try {
                     Socket sk = serverSocket.accept();
-                    System.out.println("Slave found");
                     addSlave(sk);
                 } catch (IOException ex) {
                     Logger.getLogger(ServerProgram.class.getName()).log(Level.SEVERE, null, ex);
@@ -39,46 +40,33 @@ public class ServerProgram {
 
     private void refreshSlaves() {
         for (int i = 0; i < slaves.size(); i++) {
-//            if (!slaves.get(i).getConnection().) {
-//                slaves.remove(i);
-//                System.out.println("slave lost");
-//                i--;
-//            } else {
-//                System.out.println("slave operating");
-//            }
+            if (!(slaves.get(i).getState() == Slave.READY)
+                    && !(slaves.get(i).getState() == Slave.BUSY)) {
+                slaves.remove(i);
+                i--;
+            }
         }
     }
 
     private void addSlave(Socket connection) {
         try {
-            slaves.add(new Slave(connection, Network.generateID()));
+            slaves.add(new Slave(connection));
         } catch (IOException ex) {
             Logger.getLogger(ServerProgram.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public Slave getSlave(int id) {
-        for (Slave s : slaves) {
-            if (s.getID() == id) {
-                return s;
-            }
-        }
-        return null;
-    }
-
     public static void main(String[] args) throws IOException {
         ServerProgram program = new ServerProgram();
-        System.out.println("Here");
-        while (true) {
-            for (Slave slave : program.slaves) {
-                System.out.println("slave: " + slave.getAddress());
-            }
-            program.refreshSlaves();
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ServerProgram.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        while (program.slaves.size() <= 0) {
         }
+        
+        //Task temp = new Task(0, );
+        //program.slaves.get(0).runTask(null, null) //program.refreshSlaves();
+                //        String s = new Scanner(System.in).nextLine();
+                //        if (s.contains("call")) {
+                //            if (program.slaves.size() > 0) {
+                //            }
+                //        }
     }
 }

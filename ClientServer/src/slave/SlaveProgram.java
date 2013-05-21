@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import main.UserProgramLoader;
+import main.JarUnpacker;
+import main.UserProgramClassLoader;
 import main.programStructure.Network;
 import main.programStructure.PacketMap;
 import main.programStructure.Task;
+import server.Slave;
 
 /**
  *
@@ -25,26 +27,49 @@ public class SlaveProgram {
         public void run() {
             while (true) {
                 try {
-                    InputStream in = socket.getInputStream();
-                    while (in.read() != Network.TASK_START) {
+                    int response = 0;
+                    while (response == 0) {
+                        if (socket.getInputStream().available() > 0) {
+                            response = socket.getInputStream().read();
+                        }
                     }
-                    System.out.println("Task Found");
-                    int id = Network.readInt(in);
-                    String className = Network.readString(in);
-                    byte[] jarData = Network.readData(in);
-                    PacketMap map;
-                    if (Network.readInt(in) == 1) {
-                        map = new PacketMap();
-                        map.receive(in);
+                    socket.getOutputStream().write(Slave.ACK);
+                    if (response == Slave.TASK_READY) {
+                        InputStream in = socket.getInputStream();
+                        int id = Network.readInt(in);
+                        String className = Network.readString(in);
+                        byte[] jarData = Network.readData(in);
+                        PacketMap map;
+                        if (Network.readInt(in) == 1) {
+                            map = new PacketMap();
+                            map.receive(in);
+                        }
+                        in.read(); // Catches the END_DATA flag.
+                        //Task task = new Task(id, className, jarData);
+                        JarUnpacker j = new JarUnpacker(jarData, "task_code");
+                        j.extract();
+                        UserProgramClassLoader loader =
+                                new UserProgramClassLoader(
+                                this.getClass().getClassLoader(),
+                                j.getExtractDirectory().toString() + className);
+                        
                     }
-                    in.read(); // Catches the END_DATA flag.
-                    //Task task = new Task(id, className, jarData);
-                    UserProgramLoader loader = new UserProgramLoader(jarData);
-                    
                 } catch (IOException ex) {
-                    Logger.getLogger(SlaveProgram.class.getName()).log(Level.SEVERE, null, ex);
                 }
+
+
             }
+//            while (true) {
+//                try {
+//                    InputStream in = socket.getInputStream();
+//                    while (in.read() != Network.TASK_START) {
+//                    }
+//                    System.out.println("Task Found");
+//                    
+//                } catch (IOException ex) {
+//                    Logger.getLogger(SlaveProgram.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
         }
     };
 
@@ -53,9 +78,6 @@ public class SlaveProgram {
         if (!Network.handshake(socket)) {
             throw new IOException();
         }
-        byte[] idBytes = new byte[4];
-        socket.getInputStream().read(idBytes);
-        id = (idBytes[0] << 24) | (idBytes[1] << 16) | (idBytes[2] << 8) | idBytes[3];
         new Thread(listener).start();
     }
 

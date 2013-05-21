@@ -1,5 +1,6 @@
 package main;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
@@ -17,10 +18,12 @@ public class Main {
     public static void main(String[] args) throws UnknownHostException, IOException {
         UserProgramClassLoader loader = new UserProgramClassLoader(Main.class.getClassLoader(),
                 "test.otherTest.ProgramTest");
-        Class userProgramClass;
         UserProgram user = null;
+        JarUnpacker p = new JarUnpacker(
+                new File("../UserProgram/dist/UserProgram.jar"), "code_temp");
+        p.extract();
         try {
-            userProgramClass = loader.loadClass("../UserProgram/build/classes/test/otherTest/"
+            Class userProgramClass = loader.loadClass(p.getExtractDirectory() + "/test/otherTest/"
                     + "ProgramTest.class");
             user = (UserProgram) userProgramClass.getConstructor(Main.class).newInstance(new Main());
         } catch (ClassNotFoundException ex) {

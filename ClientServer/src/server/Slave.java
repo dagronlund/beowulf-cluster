@@ -2,8 +2,9 @@ package server;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import main.programStructure.Network;
+import main.programStructure.PacketMap;
 import main.programStructure.Task;
 
 /**
@@ -12,25 +13,61 @@ import main.programStructure.Task;
  */
 public class Slave {
 
-    private ArrayList<Task> taskList = new ArrayList<Task>();
+    public static final int READY = 1;
+    public static final int BUSY = 2;
+    public static final int OFFLINE = 3;
+    //
+    public static final byte HEARTBEAT = 3;
+    public static final byte TASK_READY = 4;
+    public static final byte ACK = 5;
+    //
+    private AtomicInteger state;
+    private Task task;
+    private PacketMap map;
     private Socket socket;
     private String address;
-    private int id;
+    private Runnable listener = new Runnable() {
+        @Override
+        public void run() {
+            while (state.get() == READY) {
+                if (task == null) {
+                    try {
+                        socket.getOutputStream().write(HEARTBEAT);
+                        long start = System.currentTimeMillis();
+                        state.set(OFFLINE);
+                        while (!Network.timedOut(start) && state.get() == OFFLINE) {
+                            if (socket.getInputStream().available() > 0
+                                    && socket.getInputStream().read() == ACK) {
+                                state.set(READY);
+                            }
+                        }
+                    } catch (IOException ex) {
+                    }
+                } else {
+                    try {
+                        socket.getOutputStream().write(TASK_READY);
+                        while (socket.getInputStream().available() < 1
+                                && socket.getInputStream().read() != ACK) {
+                        }
+                        state.set(BUSY);
+                        map = Network.executeTask(socket, task, map);
+                        task = null;
+                        state.set(READY);
+                    } catch (IOException ex) {
+                    }
+                }
+            }
+        }
+    };
 
-    public Slave(Socket socket, int id) throws IOException {
+    public Slave(Socket socket) throws IOException {
         this.socket = socket;
-        this.id = id;
         address = socket.getInetAddress().getHostAddress();
-        if (socket.getInputStream().read() != Network.HANDSHAKE) {
+        if (!Network.handshake(socket)) {
             throw new IOException();
         }
-        socket.getOutputStream().write(Network.HANDSHAKE);
-        byte[] idBytes = new byte[4];
-        idBytes[0] = (byte) (id >> 24);
-        idBytes[1] = (byte) (id >> 16);
-        idBytes[2] = (byte) (id >> 8);
-        idBytes[3] = (byte) (id);
-        socket.getOutputStream().write(idBytes);
+        state = new AtomicInteger(READY);
+        new Thread(listener).start();
     }
 
     public String getAddress() {
@@ -41,24 +78,20 @@ public class Slave {
         return socket;
     }
 
-    public int getID() {
-        return id;
+    public int getState() {
+        return state.get();
     }
 
-    public void updateTasks() {
-        //TODO: Send a packet to Slaves to ask for tasklist, make taskList equal to return.
-    }
-
-    public int getAmountOfTasks() {
-        int ret = 0;
-        for (int i = 0; i < taskList.size(); i++) {
-            ret++;
+    public PacketMap runTask(Task task, PacketMap map) {
+        this.task = task;
+        this.map = map;
+        while (state.get() == BUSY) {
         }
-        return ret;
+        return map;
     }
 
     @Override
     public String toString() {
-        return Integer.toString(id);
+        return socket.getInetAddress().toString();
     }
 }

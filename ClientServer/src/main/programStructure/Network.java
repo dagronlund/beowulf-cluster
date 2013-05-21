@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  */
 public class Network {
 
-    public static final int HANDSHAKE_WAIT = 2000;
+    public static final int NETWORK_WAIT = 1000;
     public static final int PORT = 1234;
     public static final byte HANDSHAKE = 42;
     public static final byte END_DATA = -1;
@@ -33,7 +33,7 @@ public class Network {
         } catch (SocketException ex) {
         }
         long start = System.currentTimeMillis();
-        while ((System.currentTimeMillis() - start) <= HANDSHAKE_WAIT) {
+        while ((System.currentTimeMillis() - start) <= NETWORK_WAIT) {
             if (sck.getInputStream().available() > 0
                     && sck.getInputStream().read() == HANDSHAKE) {
                 return true;
@@ -147,5 +147,9 @@ public class Network {
 
     private static char bytesToChar(byte[] b) {
         return (char) ((b[0] << 8) | b[1]);
+    }
+    
+    public static boolean timedOut(long start) {
+        return (System.currentTimeMillis() - start) > NETWORK_WAIT;
     }
 }

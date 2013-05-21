@@ -1,5 +1,6 @@
 package test;
 
+import java.awt.Toolkit;
 import main.Main;
 import main.programStructure.UserProgram;
 
@@ -14,6 +15,7 @@ public class ProgramTest extends UserProgram {
 
     @Override
     public void run() {
-        System.out.println("This works");
+        System.out.println("This works2");
+        Toolkit.getDefaultToolkit().beep();
     }
 }

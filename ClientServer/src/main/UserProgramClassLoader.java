@@ -7,13 +7,12 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import main.programStructure.Util;
 
 /**
  * @author David Gronlund
  */
 public class UserProgramClassLoader extends ClassLoader {
-    
+
     private String classQualifier;
 
     public UserProgramClassLoader(ClassLoader parent, String classQualifier) {
@@ -23,13 +22,9 @@ public class UserProgramClassLoader extends ClassLoader {
 
     @Override
     public Class loadClass(String classLoc) throws ClassNotFoundException {
-        //Neeeeeed to fix this
-        System.out.println(this.classQualifier);
-        System.out.println(Util.classLocationToQualifier(classLoc));
-        if (!classQualifier.equals(Util.classLocationToQualifier(classLoc))) {
+        if (!classLoc.endsWith(classQualifier.replace(".", "/") + ".class")) {
             return super.loadClass(classLoc);
         }
-        //
         try {
             File file = new File(classLoc);
             InputStream in = new FileInputStream(file);
