@@ -52,7 +52,7 @@ public class SlaveProgram {
                                 new UserProgramClassLoader(
                                 this.getClass().getClassLoader(),
                                 j.getExtractDirectory().toString() + className);
-                        
+
                     }
                 } catch (IOException ex) {
                 }
@@ -75,6 +75,14 @@ public class SlaveProgram {
 
     public SlaveProgram(String ip) throws IOException {
         socket = new Socket(ip, Network.PORT);
+        if (!Network.handshake(socket)) {
+            throw new IOException();
+        }
+        new Thread(listener).start();
+    }
+
+    public SlaveProgram(String ip, int port) throws IOException {
+        socket = new Socket(ip, port);
         if (!Network.handshake(socket)) {
             throw new IOException();
         }

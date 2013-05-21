@@ -37,6 +37,12 @@ public class ServerProgram {
         slaves = new ArrayList<Slave>();
         listener.start();
     }
+    
+    public ServerProgram(int port) throws IOException {
+        serverSocket = new ServerSocket(port);
+        slaves = new ArrayList<Slave>();
+        listener.start();
+    }
 
     private void refreshSlaves() {
         for (int i = 0; i < slaves.size(); i++) {
@@ -58,8 +64,9 @@ public class ServerProgram {
 
     public static void main(String[] args) throws IOException {
         ServerProgram program = new ServerProgram();
-        while (program.slaves.size() <= 0) {
-        }
+        System.out.println(args.length);
+//        while (program.slaves.size() <= 0) {
+//        }
         
         //Task temp = new Task(0, );
         //program.slaves.get(0).runTask(null, null) //program.refreshSlaves();
