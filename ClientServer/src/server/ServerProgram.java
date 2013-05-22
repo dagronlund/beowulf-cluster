@@ -44,7 +44,7 @@ public class ServerProgram {
         listener.start();
     }
 
-    private void refreshSlaves() {
+    public void refreshSlaves() {
         for (int i = 0; i < slaves.size(); i++) {
             if (!(slaves.get(i).getState() == Slave.READY)
                     && !(slaves.get(i).getState() == Slave.BUSY)) {
@@ -64,7 +64,6 @@ public class ServerProgram {
 
     public static void main(String[] args) throws IOException {
         ServerProgram program = new ServerProgram();
-        System.out.println(args.length);
 //        while (program.slaves.size() <= 0) {
 //        }
         
