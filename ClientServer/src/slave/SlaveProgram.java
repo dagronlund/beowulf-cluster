@@ -8,7 +8,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.JarUnpacker;
-import main.UserProgramClassLoader;
+import main.UserClassLoader;
 import main.programStructure.Network;
 import main.programStructure.PacketMap;
 import main.programStructure.Task;
@@ -48,8 +48,8 @@ public class SlaveProgram {
                         //Task task = new Task(id, className, jarData);
                         JarUnpacker j = new JarUnpacker(jarData, "task_code");
                         j.extract();
-                        UserProgramClassLoader loader =
-                                new UserProgramClassLoader(
+                        UserClassLoader loader =
+                                new UserClassLoader(
                                 this.getClass().getClassLoader(),
                                 j.getExtractDirectory().toString() + className);
 

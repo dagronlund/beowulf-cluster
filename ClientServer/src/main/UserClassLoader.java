@@ -11,11 +11,11 @@ import java.util.logging.Logger;
 /**
  * @author David Gronlund
  */
-public class UserProgramClassLoader extends ClassLoader {
+public class UserClassLoader extends ClassLoader {
 
     private String classQualifier;
 
-    public UserProgramClassLoader(ClassLoader parent, String classQualifier) {
+    public UserClassLoader(ClassLoader parent, String classQualifier) {
         super(parent);
         this.classQualifier = classQualifier;
     }
@@ -33,9 +33,9 @@ public class UserProgramClassLoader extends ClassLoader {
             in.close();
             return defineClass(classQualifier, b, 0, b.length);
         } catch (MalformedURLException ex) {
-            Logger.getLogger(UserProgramClassLoader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserClassLoader.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(UserProgramClassLoader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserClassLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

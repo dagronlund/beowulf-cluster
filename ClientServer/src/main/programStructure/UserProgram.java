@@ -1,20 +1,20 @@
 package main.programStructure;
 
-import main.Main;
+import server.ServerProgram;
 
 /**
  * @author David Gronlund
  */
 public abstract class UserProgram {
 
-    private Main main;
+    private ServerProgram program;
 
-    public UserProgram(Main main) {
-        this.main = main;
+    public UserProgram(ServerProgram program) {
+        this.program = program;
     }
 
-    public Main getMainProgram() {
-        return main;
+    public ServerProgram getServer() {
+        return program;
     }
 
     public abstract void run();

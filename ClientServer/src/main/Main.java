@@ -16,7 +16,7 @@ import main.programStructure.UserProgram;
 public class Main {
 
     public static void main(String[] args) throws UnknownHostException, IOException {
-        UserProgramClassLoader loader = new UserProgramClassLoader(Main.class.getClassLoader(),
+        UserClassLoader loader = new UserClassLoader(Main.class.getClassLoader(),
                 "test.otherTest.ProgramTest");
         UserProgram user = null;
         JarUnpacker p = new JarUnpacker(

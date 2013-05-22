@@ -8,6 +8,10 @@ public class Util {
     public static String classLocationToQualifier(String location) {
         return location.replace(".class", "").replace("/", ".");
     }
+    
+    public static String qualifierToClassLocation(String qualifier) {
+        return qualifier.replace(".", "/") + ".class";
+    }
 
     private String getFile(String location) {
         String[] parts = location.split("\\\\"); //First backslash pair clears

@@ -30,30 +30,32 @@ public class Slave {
         @Override
         public void run() {
             while (state.get() == READY) {
-                if (task == null) {
-                    try {
-                        socket.getOutputStream().write(HEARTBEAT);
-                        long start = System.currentTimeMillis();
-                        state.set(OFFLINE);
-                        while (!Network.timedOut(start) && state.get() == OFFLINE) {
-                            if (socket.getInputStream().available() > 0
-                                    && socket.getInputStream().read() == ACK) {
-                                state.set(READY);
+                synchronized (state) {
+                    if (task == null) {
+                        try {
+                            socket.getOutputStream().write(HEARTBEAT);
+                            long start = System.currentTimeMillis();
+                            state.set(OFFLINE);
+                            while (!Network.timedOut(start) && state.get() == OFFLINE) {
+                                if (socket.getInputStream().available() > 0
+                                        && socket.getInputStream().read() == ACK) {
+                                    state.set(READY);
+                                }
                             }
+                        } catch (IOException ex) {
                         }
-                    } catch (IOException ex) {
-                    }
-                } else {
-                    try {
-                        socket.getOutputStream().write(TASK_READY);
-                        while (socket.getInputStream().available() < 1
-                                && socket.getInputStream().read() != ACK) {
+                    } else {
+                        try {
+                            socket.getOutputStream().write(TASK_READY);
+                            while (socket.getInputStream().available() < 1
+                                    && socket.getInputStream().read() != ACK) {
+                            }
+                            state.set(BUSY);
+                            map = Network.executeTask(socket, task, map);
+                            task = null;
+                            state.set(READY);
+                        } catch (IOException ex) {
                         }
-                        state.set(BUSY);
-                        map = Network.executeTask(socket, task, map);
-                        task = null;
-                        state.set(READY);
-                    } catch (IOException ex) {
                     }
                 }
             }
@@ -80,6 +82,10 @@ public class Slave {
 
     public int getState() {
         return state.get();
+    }
+
+    public void kill() {
+        state.set(OFFLINE);
     }
 
     public PacketMap runTask(Task task, PacketMap map) {

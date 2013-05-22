@@ -1,14 +1,21 @@
 package server;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import main.JarUnpacker;
+import main.Main;
+import main.ProgramLoader;
+import main.UserClassLoader;
 import main.programStructure.Network;
-import main.programStructure.Task;
+import main.programStructure.UserProgram;
+import main.programStructure.Util;
 
 /**
  *
@@ -16,12 +23,13 @@ import main.programStructure.Task;
  */
 public class ServerProgram {
 
+    private boolean done = false;
     private ServerSocket serverSocket;
     public ArrayList<Slave> slaves;
     private Thread listener = new Thread() {
         @Override
         public void run() {
-            while (true) {
+            while (!done) {
                 try {
                     Socket sk = serverSocket.accept();
                     addSlave(sk);
@@ -37,7 +45,7 @@ public class ServerProgram {
         slaves = new ArrayList<Slave>();
         listener.start();
     }
-    
+
     public ServerProgram(int port) throws IOException {
         serverSocket = new ServerSocket(port);
         slaves = new ArrayList<Slave>();
@@ -62,17 +70,30 @@ public class ServerProgram {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        ServerProgram program = new ServerProgram();
-//        while (program.slaves.size() <= 0) {
-//        }
-        
-        //Task temp = new Task(0, );
-        //program.slaves.get(0).runTask(null, null) //program.refreshSlaves();
-                //        String s = new Scanner(System.in).nextLine();
-                //        if (s.contains("call")) {
-                //            if (program.slaves.size() > 0) {
-                //            }
-                //        }
+    public void runProgram(String loc) throws FileNotFoundException, IOException {
+        JarUnpacker jar = new JarUnpacker(new File(loc), "code_base");
+        jar.extract();
+        ProgramLoader loader = new ProgramLoader(jar.getExtractDirectory().toString());
+        UserClassLoader classLoader = new UserClassLoader(
+                getClass().getClassLoader(), 
+                Util.classLocationToQualifier(loader.getMainProgram()));
+        UserProgram user = null;
+        try {
+            Class userProgramClass = 
+                    classLoader.loadClass(
+                    jar.getExtractDirectory() + "/" + loader.getMainProgram());
+            user = (UserProgram) userProgramClass.getConstructor(getClass()).newInstance(this);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchMethodException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvocationTargetException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        user.run();
     }
 }

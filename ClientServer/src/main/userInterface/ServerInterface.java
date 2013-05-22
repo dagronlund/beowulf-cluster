@@ -1,5 +1,10 @@
 package main.userInterface;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import server.ServerProgram;
 
 /**
@@ -15,8 +20,24 @@ public class ServerInterface extends UserInterface {
 
     @Override
     public void run() {
-        System.out.print("Enter the location of the jar file to execute: ");
-        String loc = getInput().nextLine();
-        program.kill();
+        boolean exit = false;
+        while (!exit) {
+            System.out.print("Command: ");
+            String s = getInput().nextLine();
+            if (s.toLowerCase().equals("exit")) {
+                exit = true;
+            } else if (s.toLowerCase().equals("execute")) {
+                System.out.println("Jar file to run: ");
+                s = getInput().nextLine();
+                try {
+                    program.runProgram(s);
+                } catch (FileNotFoundException ex) {
+                    System.out.println("That is not a valid file location.");
+                } catch (IOException ex) {
+                    System.out.println("Fatal io exception.");
+                }
+            }
+        }
+        System.out.println("Server Done");
     }
 }
