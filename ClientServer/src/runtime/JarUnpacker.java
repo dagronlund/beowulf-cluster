@@ -1,4 +1,4 @@
-package main;
+package runtime;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -57,6 +57,15 @@ public class JarUnpacker {
      */
     public File getExtractDirectory() {
         return extractDirectory;
+    }
+
+    /**
+     * Returns the raw binary data that the jar file consists of.
+     *
+     * @return jarFile
+     */
+    public byte[] getRawBinary() {
+        return jarFile;
     }
 
     /**

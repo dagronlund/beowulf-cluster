@@ -1,4 +1,4 @@
-package main.programStructure;
+package main.program;
 
 /**
  * @author David Gronlund

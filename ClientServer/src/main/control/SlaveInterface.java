@@ -1,4 +1,4 @@
-package main.userInterface;
+package main.control;
 
 import slave.SlaveProgram;
 

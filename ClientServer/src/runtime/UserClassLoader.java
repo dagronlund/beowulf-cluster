@@ -1,4 +1,4 @@
-package main;
+package runtime;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,14 +15,28 @@ public class UserClassLoader extends ClassLoader {
 
     private String classQualifier;
 
+    /**
+     * Constructs a custom class loader using any available ClassLoader and the
+     * qualifier of the class it is supposed to load.
+     *
+     * @param parent The class loader of which to use
+     * @param classQualifier The qualifier of the class to load
+     */
     public UserClassLoader(ClassLoader parent, String classQualifier) {
         super(parent);
         this.classQualifier = classQualifier;
     }
 
+    /**
+     * Loads the class for this class loader given its location.
+     *
+     * @param classLoc The location of the class to load
+     * @return An instance of the Class object for this class
+     * @throws ClassNotFoundException
+     */
     @Override
     public Class loadClass(String classLoc) throws ClassNotFoundException {
-        if (!classLoc.endsWith(classQualifier.replace(".", "/") + ".class")) {
+        if (!classLoc.endsWith(Util.qualifierToClassLocation(classQualifier))) {
             return super.loadClass(classLoc);
         }
         try {

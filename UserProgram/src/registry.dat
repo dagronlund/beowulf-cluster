@@ -1,3 +1,2 @@
 program.mainProgram = "test.ProgramTest" 
-program.task.something = "main.something.Beanz"
-program.task.somethingElse = "main.something.CrazyBeanz"
+program.task.something = "test.MyTask"

@@ -1,5 +1,6 @@
-package main.programStructure;
+package main.program;
 
+import runtime.TaskPackage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,11 +43,10 @@ public class Network {
         return false;
     }
 
-    public static PacketMap executeTask(Socket sck, Task task, PacketMap packets) throws IOException {
+    public static PacketMap executeTask(Socket sck, TaskPackage task, PacketMap packets) throws IOException {
         OutputStream out = sck.getOutputStream();
         out.write(TASK_START);
-        writeInt(out, task.getTaskID());
-        writeString(out, task.getClassLocation());
+        writeString(out, task.getTaskId());
         writeData(out, task.getJarData());
         if (packets != null) {
             writeInt(out, 1);
@@ -78,7 +78,7 @@ public class Network {
         }
         return 0;
     }
-    
+
     public static void writeString(OutputStream out, String s) {
         try {
             out.write(intToBytes(s.length()));
@@ -148,7 +148,7 @@ public class Network {
     private static char bytesToChar(byte[] b) {
         return (char) ((b[0] << 8) | b[1]);
     }
-    
+
     public static boolean timedOut(long start) {
         return (System.currentTimeMillis() - start) > NETWORK_WAIT;
     }

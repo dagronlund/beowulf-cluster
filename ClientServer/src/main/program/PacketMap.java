@@ -1,4 +1,4 @@
-package main.programStructure;
+package main.program;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,7 +68,7 @@ public class PacketMap {
             long start = System.currentTimeMillis();
             while ((System.currentTimeMillis() - start) <= TIMEOUT) {
                 if (in.read() == Network.PACKET_START) {
-                    
+
 //                    byte[] bytes = new byte[4];
 //                    in.read(bytes);
 //                    int length = bytesToInt(bytes);

@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import main.programStructure.Network;
+import main.program.Network;
 
 /**
  * @author David Gronlund

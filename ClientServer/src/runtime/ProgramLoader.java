@@ -1,4 +1,4 @@
-package main;
+package runtime;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,24 +9,53 @@ import java.util.Scanner;
 
 /**
  *
- * @author dgronlund
+ * @author David Gronlund
  */
 public class ProgramLoader {
 
-    private File directory;
+    private File path;
     private String mainProgram;
     private Map<String, String> tasks;
 
-    public ProgramLoader(String url) throws FileNotFoundException {
-        directory = new File(url);
+    /**
+     * Creates a new program loader from the contents of path. This constructor
+     * only reads the contents of the registry and stores them.
+     *
+     * @param path The directory from which to load the program.
+     * @throws FileNotFoundException
+     */
+    public ProgramLoader(File path) throws FileNotFoundException {
+        this.path = path;
         tasks = new HashMap<String, String>();
         readRegistry();
     }
-    
-    public String getMainProgram() {
-        return mainProgram.replace(".", "/") + ".class";
+
+    /**
+     * Returns the location of the loaded program.
+     *
+     * @return path
+     */
+    public File getPath() {
+        return path;
     }
 
+    /**
+     * Returns the class qualifier of the main program. (e.g.
+     * com.david.program.main.MainProgram)
+     *
+     * @return mainProgram
+     */
+    public String getMainProgram() {
+        return mainProgram;
+    }
+
+    /**
+     * Return the task qualifier for the specified taskId. (e.g.
+     * com.david.program.tasks.RandomTask)
+     *
+     * @param taskID The task to search for, specified in the registry.
+     * @return
+     */
     public String getTask(String taskID) {
         if (tasks.containsKey(taskID)) {
             return tasks.get(taskID).replace(".", "/") + ".class";
@@ -34,8 +63,15 @@ public class ProgramLoader {
         return null;
     }
 
+    /**
+     * Reads and stores the contents of the registry for this program. This
+     * reads the location of the main program and the specific tasks specified
+     * in the registry and records them for later use.
+     *
+     * @throws FileNotFoundException
+     */
     private void readRegistry() throws FileNotFoundException {
-        FileReader reader = new FileReader(directory.toString() + "/registry.dat");
+        FileReader reader = new FileReader(path.toString() + "/registry.dat");
         Scanner scan = new Scanner(reader);
         while (scan.hasNextLine()) {
             String line = cleanString(scan.nextLine());

@@ -1,6 +1,5 @@
-package main.userInterface;
+package main.control;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -26,6 +25,13 @@ public class ServerInterface extends UserInterface {
             String s = getInput().nextLine();
             if (s.toLowerCase().equals("exit")) {
                 exit = true;
+                try {
+                    program.shutdown();
+                } catch (IOException ex) {
+                    System.out.println("Program failed to close due to IOException: ");
+                    ex.printStackTrace();
+                    exit = false;
+                }
             } else if (s.toLowerCase().equals("execute")) {
                 System.out.println("Jar file to run: ");
                 s = getInput().nextLine();

@@ -3,9 +3,11 @@ package server;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicInteger;
-import main.programStructure.Network;
-import main.programStructure.PacketMap;
-import main.programStructure.Task;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import main.program.Network;
+import main.program.PacketMap;
+import runtime.TaskPackage;
 
 /**
  *
@@ -22,7 +24,7 @@ public class Slave {
     public static final byte ACK = 5;
     //
     private AtomicInteger state;
-    private Task task;
+    private TaskPackage task;
     private PacketMap map;
     private Socket socket;
     private String address;
@@ -51,6 +53,7 @@ public class Slave {
                                     && socket.getInputStream().read() != ACK) {
                             }
                             state.set(BUSY);
+                            System.out.println("Server sent Task");
                             map = Network.executeTask(socket, task, map);
                             task = null;
                             state.set(READY);
@@ -58,11 +61,17 @@ public class Slave {
                         }
                     }
                 }
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Slave.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     };
 
     public Slave(Socket socket) throws IOException {
+        System.out.println("Slave Connected");
         this.socket = socket;
         address = socket.getInetAddress().getHostAddress();
         if (!Network.handshake(socket)) {
@@ -84,11 +93,14 @@ public class Slave {
         return state.get();
     }
 
-    public void kill() {
+    public void shutdown() {
         state.set(OFFLINE);
     }
 
-    public PacketMap runTask(Task task, PacketMap map) {
+    public PacketMap runTask(TaskPackage task, PacketMap map) {
+        System.out.println("User Program tried to run task");
+        while (state.get() != READY) {
+        }
         this.task = task;
         this.map = map;
         while (state.get() == BUSY) {

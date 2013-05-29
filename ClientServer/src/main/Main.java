@@ -1,21 +1,22 @@
 package main;
 
+import runtime.UserClassLoader;
+import runtime.JarUnpacker;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import main.programStructure.Task;
-import main.programStructure.UserProgram;
+import main.program.user.UserProgram;
 
 /**
  * @author David Gronlund
  */
 public class Main {
 
-    public static void main(String[] args) throws UnknownHostException, IOException {
+    public static void main(String[] args)
+            throws UnknownHostException, IOException {
         UserClassLoader loader = new UserClassLoader(Main.class.getClassLoader(),
                 "test.otherTest.ProgramTest");
         UserProgram user = null;
@@ -37,10 +38,6 @@ public class Main {
         } catch (InvocationTargetException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-        user.run();
-    }
-
-    public Map<String, Object> submitTask(Task task) {
-        return null;
+        //user.run();
     }
 }

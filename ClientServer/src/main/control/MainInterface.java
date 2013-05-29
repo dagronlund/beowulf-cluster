@@ -1,4 +1,4 @@
-package main.userInterface;
+package main.control;
 
 import java.io.IOException;
 import server.ServerProgram;

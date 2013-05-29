@@ -6,9 +6,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import main.programStructure.DataPacket;
-import main.programStructure.Network;
-import main.programStructure.PacketMap;
+import main.program.DataPacket;
+import main.program.Network;
+import main.program.PacketMap;
 
 /**
  * @author David Gronlund
