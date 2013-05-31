@@ -98,13 +98,14 @@ public class Slave {
     }
 
     public PacketMap runTask(TaskPackage task, PacketMap map) {
-        System.out.println("User Program tried to run task");
         while (state.get() != READY) {
         }
+        System.out.println("Slave Object is running task");
         this.task = task;
         this.map = map;
         while (state.get() == BUSY) {
         }
+        System.out.println("Slave Object recieved result");
         return map;
     }
 

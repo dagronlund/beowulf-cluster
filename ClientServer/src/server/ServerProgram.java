@@ -89,8 +89,8 @@ public class ServerProgram {
             public void run() {
                 while (!done) {
                     for (Slave s : slaves) {
-                        System.out.println("state: " + s.getState());
                         if (s.getState() == Slave.READY) {
+                            System.out.println("Slave object is called to run task");
                             PacketMap result = s.runTask(tp, map);
                             results.put(id, result);
                             return;

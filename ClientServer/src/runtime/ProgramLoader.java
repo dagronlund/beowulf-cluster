@@ -58,7 +58,7 @@ public class ProgramLoader {
      */
     public String getTask(String taskID) {
         if (tasks.containsKey(taskID)) {
-            return tasks.get(taskID).replace(".", "/") + ".class";
+            return tasks.get(taskID);
         }
         return null;
     }

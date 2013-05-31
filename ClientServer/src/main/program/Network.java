@@ -45,8 +45,8 @@ public class Network {
 
     public static PacketMap executeTask(Socket sck, TaskPackage task, PacketMap packets) throws IOException {
         OutputStream out = sck.getOutputStream();
-        out.write(TASK_START);
         writeString(out, task.getTaskId());
+        System.out.println("Task data size: " + task.getJarData().length);
         writeData(out, task.getJarData());
         if (packets != null) {
             writeInt(out, 1);
@@ -54,7 +54,6 @@ public class Network {
         } else {
             writeInt(out, 0);
         }
-        out.write(END_DATA);
         PacketMap map = new PacketMap();
         map.receive(sck.getInputStream());
         return map;
@@ -81,9 +80,9 @@ public class Network {
 
     public static void writeString(OutputStream out, String s) {
         try {
-            out.write(intToBytes(s.length()));
-            for (char c : s.toCharArray()) {
-                out.write(charToBytes(c));
+            writeInt(out, s.length() * 2);
+            for (int i = 0; i < s.length(); i++) {
+                out.write(charToBytes(s.charAt(i)));
             }
         } catch (IOException ex) {
             Logger.getLogger(Network.class.getName()).log(Level.SEVERE, null, ex);
@@ -92,13 +91,12 @@ public class Network {
 
     public static String readString(InputStream in) {
         try {
-            byte[] bytes = new byte[4];
+            int size = readInt(in);
+            waitUntilAvailable(in, size);
+            byte[] bytes = new byte[size];
             in.read(bytes);
-            int length = bytesToInt(bytes);
-            bytes = new byte[length * 2];
-            in.read(bytes);
-            char[] s = new char[length];
-            for (int i = 0; i < length; i++) {
+            char[] s = new char[size / 2];
+            for (int i = 0; i < size / 2; i++) {
                 s[i] = bytesToChar(new byte[]{bytes[(i * 2)], bytes[(i * 2) + 1]});
             }
             return new String(s);
@@ -110,10 +108,8 @@ public class Network {
 
     public static void writeData(OutputStream out, byte[] data) {
         try {
-            out.write(intToBytes(data.length));
-            for (byte b : data) {
-                out.write(b);
-            }
+            writeInt(out, data.length);
+            out.write(data);
         } catch (IOException ex) {
             Logger.getLogger(Network.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -121,12 +117,11 @@ public class Network {
 
     public static byte[] readData(InputStream in) {
         try {
-            byte[] bytes = new byte[4];
-            in.read(bytes);
-            int length = bytesToInt(bytes);
-            bytes = new byte[length];
-            in.read(bytes);
-            return bytes;
+            int length = readInt(in);
+            waitUntilAvailable(in, length);
+            byte[] data = new byte[length];
+            in.read(data);
+            return data;
         } catch (IOException ex) {
             Logger.getLogger(Network.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -138,7 +133,7 @@ public class Network {
     }
 
     private static int bytesToInt(byte[] b) {
-        return (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3];
+        return ((b[0] & 0xFF) << 24) | ((b[1] & 0xFF) << 16) | ((b[2] & 0xFF) << 8) | (b[3] & 0xFF);
     }
 
     private static byte[] charToBytes(char c) {
@@ -146,10 +141,14 @@ public class Network {
     }
 
     private static char bytesToChar(byte[] b) {
-        return (char) ((b[0] << 8) | b[1]);
+        return (char) (((b[0] & 0xFF) << 8) | (b[1] & 0xFF));
     }
 
     public static boolean timedOut(long start) {
         return (System.currentTimeMillis() - start) > NETWORK_WAIT;
+    }
+    
+    public static void waitUntilAvailable(InputStream in, int numBytes) throws IOException {
+        while (in.available() < numBytes);
     }
 }

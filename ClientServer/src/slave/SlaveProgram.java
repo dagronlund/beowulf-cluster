@@ -33,16 +33,22 @@ public class SlaveProgram {
                         socket.getOutputStream().write(Slave.ACK);
                     }
                     if (response == Slave.TASK_READY) {
+                        System.out.println("Task flag recieved.");
+                        socket.getOutputStream().write(Slave.ACK);
                         InputStream in = socket.getInputStream();
                         String taskId = Network.readString(in);
+                        System.out.println("Task ID recieved: " + taskId);
                         byte[] jarData = Network.readData(in);
+                        System.out.println("Data: " + jarData.length);
+                        System.out.println("Task code recieved.");
                         PacketMap map = null;
                         if (Network.readInt(in) == 1) {
+                            System.out.println("Packets en-route.");
                             map = new PacketMap();
                             map.receive(in);
                         }
-                        in.read(); // Catches the END_DATA flag
-                        System.out.println("Slave Recieved Task");
+                        System.out.println("Task packets recieved.");
+                        System.out.println("All task data recieved.");
                         JarUnpacker j = new JarUnpacker(jarData, "task_code");
                         j.extract();
                         UserCodeFactory userCode =
