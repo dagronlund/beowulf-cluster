@@ -29,7 +29,6 @@ public class ServerInterface extends UserInterface {
                     program.shutdown();
                 } catch (IOException ex) {
                     System.out.println("Program failed to close due to IOException: ");
-                    ex.printStackTrace();
                     exit = false;
                 }
             } else if (s.toLowerCase().equals("execute")) {
@@ -40,10 +39,18 @@ public class ServerInterface extends UserInterface {
                 } catch (FileNotFoundException ex) {
                     System.out.println("That is not a valid file location.");
                 } catch (IOException ex) {
-                    System.out.println("Fatal io exception.");
+                    System.out.println("Fatal IO exception.");
+                }
+            } else if (s.toLowerCase().equals("execute test")) {
+                s = "../UserProgram/dist/UserProgram.jar";
+                try {
+                    program.runProgram(s);
+                } catch (FileNotFoundException ex) {
+                    System.out.println("That is not a valid file location.");
+                } catch (IOException ex) {
+                    System.out.println("Fatal IO exception.");
                 }
             }
         }
-        System.out.println("Server Done");
     }
 }

@@ -58,11 +58,11 @@ public class MainInterface {
                 System.out.println("Valid argument structure is:");
                 System.out.println("[slave|server] ip:port");
                 System.out.println("To use the default port, use -1 as the port argument.");
+                System.out.println("For server, disregard both the ip and colon.");
             } else {
                 System.out.println("Invaid command. Please type 'help' for assistance.");
             }
         }
         userInterface.run();
-        System.out.println("Program Complete. G'Day");
     }
 }

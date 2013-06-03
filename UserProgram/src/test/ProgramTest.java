@@ -1,6 +1,6 @@
 package test;
 
-import java.awt.Toolkit;
+import main.program.PacketMap;
 import main.program.user.UserProgram;
 import server.ServerProgram;
 
@@ -15,7 +15,13 @@ public class ProgramTest extends UserProgram {
 
     @Override
     public void run() {
-        getServer().addTask("something", null);
-        System.out.println("Success.");
+        System.out.println();
+        int id = getServer().addTask("something", null);
+        while (getServer().getTaskResult(id) == null) {
+        }
+        PacketMap map = getServer().getTaskResult(id);
+        System.out.println("Packet recv: " + map.getPacket("test").getData()[0]);
+        System.out.println("Success for user program.");
+        System.out.println();
     }
 }

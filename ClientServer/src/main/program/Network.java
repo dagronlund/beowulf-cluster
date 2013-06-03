@@ -1,6 +1,5 @@
 package main.program;
 
-import runtime.TaskPackage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,10 +17,14 @@ public class Network {
     public static final int NETWORK_WAIT = 1000;
     public static final int PORT = 1234;
     public static final byte HANDSHAKE = 42;
-    public static final byte END_DATA = -1;
-    public static final byte HEARTBEAT = 0;
-    public static final byte PACKET_START = 1;
-    public static final byte TASK_START = 2;
+    public static final byte HEARTBEAT = 43;
+    public static final byte ACK = 44;
+    public static final byte TASK_READY = 45;
+    public static final byte PACKET_START = 46;
+    //
+    public static final int ONLINE = 1;
+    public static final int OFFLINE = 2;
+    //
     private static int id = 0;
 
     public static int generateID() {
@@ -43,22 +46,6 @@ public class Network {
         return false;
     }
 
-    public static PacketMap executeTask(Socket sck, TaskPackage task, PacketMap packets) throws IOException {
-        OutputStream out = sck.getOutputStream();
-        writeString(out, task.getTaskId());
-        System.out.println("Task data size: " + task.getJarData().length);
-        writeData(out, task.getJarData());
-        if (packets != null) {
-            writeInt(out, 1);
-            packets.send(out);
-        } else {
-            writeInt(out, 0);
-        }
-        PacketMap map = new PacketMap();
-        map.receive(sck.getInputStream());
-        return map;
-    }
-
     public static void writeInt(OutputStream out, int i) {
         try {
             out.write(intToBytes(i));
@@ -70,6 +57,7 @@ public class Network {
     public static int readInt(InputStream in) {
         try {
             byte[] bytes = new byte[4];
+            block(in, 4);
             in.read(bytes);
             return bytesToInt(bytes);
         } catch (IOException ex) {
@@ -92,7 +80,7 @@ public class Network {
     public static String readString(InputStream in) {
         try {
             int size = readInt(in);
-            waitUntilAvailable(in, size);
+            block(in, size);
             byte[] bytes = new byte[size];
             in.read(bytes);
             char[] s = new char[size / 2];
@@ -118,7 +106,7 @@ public class Network {
     public static byte[] readData(InputStream in) {
         try {
             int length = readInt(in);
-            waitUntilAvailable(in, length);
+            block(in, length);
             byte[] data = new byte[length];
             in.read(data);
             return data;
@@ -147,8 +135,8 @@ public class Network {
     public static boolean timedOut(long start) {
         return (System.currentTimeMillis() - start) > NETWORK_WAIT;
     }
-    
-    public static void waitUntilAvailable(InputStream in, int numBytes) throws IOException {
+
+    public static void block(InputStream in, int numBytes) throws IOException {
         while (in.available() < numBytes);
     }
 }

@@ -14,7 +14,6 @@ import java.util.logging.Logger;
  */
 public class PacketMap {
 
-    public static int TIMEOUT = 200;
     Map<String, Packet> data;
 
     public PacketMap() {
@@ -34,28 +33,23 @@ public class PacketMap {
     }
 
     public void send(OutputStream out) {
+        Network.writeInt(out, data.size());
         for (String key : data.keySet()) {
             write(out, data.get(key));
         }
     }
 
     public void receive(InputStream in) {
-        Packet p = read(in);
-        while (p != null) {
+        int size = Network.readInt(in);
+        for (int i = 0; i < size; i++) {
+            Packet p = read(in);
             data.put(p.getKey(), p);
-            p = read(in);
         }
     }
 
     private void write(OutputStream out, Packet data) {
         try {
             out.write(Network.PACKET_START);
-//            out.write(intToBytes(data.getKey().length()));
-//            for (char c : data.getKey().toCharArray()) {
-//                out.write(charToBytes(c));
-//            }
-//            out.write(intToBytes(data.getData().length));
-//            out.write(data.getData());
             Network.writeString(out, data.getKey());
             Network.writeData(out, data.getData());
         } catch (IOException ex) {
@@ -65,25 +59,11 @@ public class PacketMap {
 
     private Packet read(InputStream in) {
         try {
-            long start = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - start) <= TIMEOUT) {
+            while (true) {
                 if (in.read() == Network.PACKET_START) {
-
-//                    byte[] bytes = new byte[4];
-//                    in.read(bytes);
-//                    int length = bytesToInt(bytes);
-//                    bytes = new byte[length * 2];
-//                    in.read(bytes);
-//                    char[] key = new char[length];
-//                    for (int i = 0; i < length; i++) {
-//                        key[i] = bytesToChar(new byte[]{bytes[(i * 2)], bytes[(i * 2) + 1]});
-//                    }
-//                    bytes = new byte[4];
-//                    in.read(bytes);
-//                    length = bytesToInt(bytes);
-//                    bytes = new byte[length];
-//                    in.read(bytes);
-                    return new DataPacket(Network.readString(in), Network.readData(in));
+                    String key = Network.readString(in);
+                    byte[] packetData = Network.readData(in);
+                    return new DataPacket(key, packetData);
                 }
             }
         } catch (SocketException ex) {

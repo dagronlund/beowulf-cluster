@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.program.user.UserProgram;
@@ -24,8 +25,8 @@ public class Main {
                 new File("../UserProgram/dist/UserProgram.jar"), "code_temp");
         p.extract();
         try {
-            Class userProgramClass = loader.loadClass(p.getExtractDirectory() + "/test/otherTest/"
-                    + "ProgramTest.class");
+            Class userProgramClass = loader.loadClass(p.getExtractDirectory() + 
+                    "/test/otherTest/ProgramTest.class");
             user = (UserProgram) userProgramClass.getConstructor(Main.class).newInstance(new Main());
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);

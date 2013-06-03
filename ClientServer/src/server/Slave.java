@@ -1,11 +1,15 @@
 package server;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import main.program.Network;
+import static main.program.Network.writeData;
+import static main.program.Network.writeInt;
+import static main.program.Network.writeString;
 import main.program.PacketMap;
 import runtime.TaskPackage;
 
@@ -15,50 +19,55 @@ import runtime.TaskPackage;
  */
 public class Slave {
 
-    public static final int READY = 1;
-    public static final int BUSY = 2;
-    public static final int OFFLINE = 3;
-    //
-    public static final byte HEARTBEAT = 3;
-    public static final byte TASK_READY = 4;
-    public static final byte ACK = 5;
-    //
-    private AtomicInteger state;
+    public static final int FREE = 1;
+    public static final int TASK_ADDED = 2;
+    public static final int TASK_COMPLETE = 3;
+    private AtomicInteger status;
+    private AtomicInteger schedule;
     private TaskPackage task;
     private PacketMap map;
     private Socket socket;
-    private String address;
+    private int ping = 0;
     private Runnable listener = new Runnable() {
         @Override
         public void run() {
-            while (state.get() == READY) {
-                synchronized (state) {
-                    if (task == null) {
+            while (status.get() == Network.ONLINE) {
+                if (schedule.get() == FREE) {
+                    synchronized (status) {
                         try {
-                            socket.getOutputStream().write(HEARTBEAT);
+                            socket.getOutputStream().write(Network.HEARTBEAT);
                             long start = System.currentTimeMillis();
-                            state.set(OFFLINE);
-                            while (!Network.timedOut(start) && state.get() == OFFLINE) {
+                            status.set(Network.OFFLINE);
+                            while (!Network.timedOut(start) && status.get() == Network.OFFLINE) {
                                 if (socket.getInputStream().available() > 0
-                                        && socket.getInputStream().read() == ACK) {
-                                    state.set(READY);
+                                        && socket.getInputStream().read() == Network.ACK) {
+                                    ping = (int) (System.currentTimeMillis() - start);
+                                    status.set(Network.ONLINE);
                                 }
                             }
                         } catch (IOException ex) {
                         }
-                    } else {
-                        try {
-                            socket.getOutputStream().write(TASK_READY);
-                            while (socket.getInputStream().available() < 1
-                                    && socket.getInputStream().read() != ACK) {
-                            }
-                            state.set(BUSY);
-                            System.out.println("Server sent Task");
-                            map = Network.executeTask(socket, task, map);
-                            task = null;
-                            state.set(READY);
-                        } catch (IOException ex) {
+                    }
+                } else if (schedule.get() == TASK_ADDED) {
+                    try {
+                        socket.getOutputStream().write(Network.TASK_READY);
+                        while (socket.getInputStream().available() < 1
+                                && socket.getInputStream().read() != Network.ACK) {
                         }
+                        OutputStream out = socket.getOutputStream();
+                        writeString(out, task.getTaskId());
+                        writeData(out, task.getJarData());
+                        if (map != null) {
+                            writeInt(out, 1);
+                            map.send(out);
+                        } else {
+                            writeInt(out, 0);
+                        }
+                        PacketMap result = new PacketMap();
+                        result.receive(socket.getInputStream());
+                        map = result;
+                        schedule.set(TASK_COMPLETE);
+                    } catch (IOException ex) {
                     }
                 }
                 try {
@@ -67,45 +76,47 @@ public class Slave {
                     Logger.getLogger(Slave.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+
         }
     };
+    Thread t;
 
     public Slave(Socket socket) throws IOException {
-        System.out.println("Slave Connected");
         this.socket = socket;
-        address = socket.getInetAddress().getHostAddress();
         if (!Network.handshake(socket)) {
             throw new IOException();
         }
-        state = new AtomicInteger(READY);
-        new Thread(listener).start();
+        status = new AtomicInteger(Network.ONLINE);
+        schedule = new AtomicInteger(FREE);
+        t = new Thread(listener);
+        t.start();
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public Socket getConnection() {
+    public Socket getSocket() {
         return socket;
     }
 
-    public int getState() {
-        return state.get();
+    public int getStatus() {
+        return status.get();
+    }
+    
+    public int getPing() {
+        return ping;
     }
 
     public void shutdown() {
-        state.set(OFFLINE);
+        status.set(Network.OFFLINE);
     }
 
-    public PacketMap runTask(TaskPackage task, PacketMap map) {
-        while (state.get() != READY) {
+    public PacketMap runTask(TaskPackage task, PacketMap packetData) {
+        while (schedule.get() != FREE) {
         }
-        System.out.println("Slave Object is running task");
         this.task = task;
-        this.map = map;
-        while (state.get() == BUSY) {
+        map = packetData;
+        schedule.set(TASK_ADDED);
+        while (schedule.get() != TASK_COMPLETE) {
         }
-        System.out.println("Slave Object recieved result");
+        schedule.set(FREE);
         return map;
     }
 

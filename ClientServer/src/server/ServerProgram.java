@@ -24,7 +24,6 @@ import main.program.user.UserProgram;
  */
 public class ServerProgram {
 
-    private Stack<TaskPackage> tasks;
     private Map<Integer, PacketMap> results;
     private boolean done = false;
     private ServerSocket serverSocket;
@@ -47,7 +46,6 @@ public class ServerProgram {
     public ServerProgram() throws IOException {
         serverSocket = new ServerSocket(Network.PORT);
         slaves = new ArrayList<Slave>();
-        tasks = new Stack<TaskPackage>();
         results = new HashMap<Integer, PacketMap>();
         listener.start();
     }
@@ -55,15 +53,13 @@ public class ServerProgram {
     public ServerProgram(int port) throws IOException {
         serverSocket = new ServerSocket(port);
         slaves = new ArrayList<Slave>();
-        tasks = new Stack<TaskPackage>();
         results = new HashMap<Integer, PacketMap>();
         listener.start();
     }
 
     public void refreshSlaves() {
         for (int i = 0; i < slaves.size(); i++) {
-            if (!(slaves.get(i).getState() == Slave.READY)
-                    && !(slaves.get(i).getState() == Slave.BUSY)) {
+            if (slaves.get(i).getStatus() == Network.OFFLINE) {
                 slaves.remove(i);
                 i--;
             }
@@ -79,18 +75,15 @@ public class ServerProgram {
     }
 
     public int addTask(String taskId, final PacketMap map) {
-        System.out.println("Task Added");
         final TaskPackage tp =
                 new TaskPackage(taskId, jar.getRawBinary());
         final int id = Network.generateID();
-        
         Thread wait = new Thread() {
             @Override
             public void run() {
                 while (!done) {
                     for (Slave s : slaves) {
-                        if (s.getState() == Slave.READY) {
-                            System.out.println("Slave object is called to run task");
+                        if (s.getStatus() == Network.ONLINE) {
                             PacketMap result = s.runTask(tp, map);
                             results.put(id, result);
                             return;
@@ -108,7 +101,10 @@ public class ServerProgram {
     }
 
     public PacketMap getTaskResult(int id) {
-        return results.get(id);
+        if (results.containsKey(id)) {
+            return results.get(id);
+        }
+        return null;
     }
 
     public void shutdown() throws IOException {
@@ -122,7 +118,6 @@ public class ServerProgram {
     public void runProgram(String loc) throws FileNotFoundException, IOException {
         jar = new JarUnpacker(new File(loc), "code_base");
         jar.extract();
-
         codeFactory = new UserCodeFactory(jar.getExtractDirectory());
         UserProgram userProgram = codeFactory.getUserProgram(this);
         userProgram.run();
