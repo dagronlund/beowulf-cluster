@@ -3,6 +3,7 @@ package slave;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.Scanner;
 import runtime.JarUnpacker;
 import main.program.Network;
 import main.program.PacketMap;
@@ -75,6 +76,7 @@ public class SlaveProgram {
     }
 
     public static void main(String[] args) throws IOException {
-        SlaveProgram program = new SlaveProgram("localhost");
+        String ip = new Scanner(System.in).nextLine();
+        SlaveProgram program = new SlaveProgram(ip);
     }
 }

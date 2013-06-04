@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 public class Network {
 
     public static final int NETWORK_WAIT = 1000;
-    public static final int PORT = 1234;
+    public static final int PORT = 51305;
     public static final byte HANDSHAKE = 42;
     public static final byte HEARTBEAT = 43;
     public static final byte ACK = 44;
