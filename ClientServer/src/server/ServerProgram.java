@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import runtime.JarUnpacker;
@@ -23,20 +27,22 @@ import main.program.user.UserProgram;
  * @author abell
  */
 public class ServerProgram {
-
+    
+    private ExecutorService executor;
     private Map<Integer, PacketMap> results;
     private boolean done = false;
     private ServerSocket serverSocket;
     private ArrayList<Slave> slaves;
     private UserCodeFactory codeFactory;
     private JarUnpacker jar;
-    private Thread listener = new Thread() {
+    //
+    private Thread slaveAccept = new Thread() {
         @Override
         public void run() {
             while (!done) {
                 try {
-                    Socket sk = serverSocket.accept();
-                    addSlave(sk);
+                    Socket socket = serverSocket.accept();
+                    slaves.add(new Slave(socket, executor));
                 } catch (IOException ex) {
                 }
             }
@@ -44,17 +50,15 @@ public class ServerProgram {
     };
 
     public ServerProgram() throws IOException {
-        serverSocket = new ServerSocket(Network.PORT);
-        slaves = new ArrayList<Slave>();
-        results = new HashMap<Integer, PacketMap>();
-        listener.start();
+        this(Network.PORT);
     }
 
     public ServerProgram(int port) throws IOException {
         serverSocket = new ServerSocket(port);
         slaves = new ArrayList<Slave>();
         results = new HashMap<Integer, PacketMap>();
-        listener.start();
+        executor = Executors.newCachedThreadPool();
+        slaveAccept.start();
     }
 
     public void refreshSlaves() {
@@ -66,19 +70,11 @@ public class ServerProgram {
         }
     }
 
-    private void addSlave(Socket connection) {
-        try {
-            slaves.add(new Slave(connection));
-        } catch (IOException ex) {
-            Logger.getLogger(ServerProgram.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     public int addTask(String taskId, final PacketMap map) {
         final TaskPackage tp =
                 new TaskPackage(taskId, jar.getRawBinary());
         final int id = Network.generateID();
-        Thread wait = new Thread() {
+        Runnable wait = new Runnable() {
             @Override
             public void run() {
                 while (!done) {
@@ -96,7 +92,7 @@ public class ServerProgram {
                 }
             }
         };
-        wait.start();
+        executor.execute(wait);
         return id;
     }
 
@@ -113,6 +109,7 @@ public class ServerProgram {
         for (Slave s : slaves) {
             s.shutdown();
         }
+        executor.shutdown();
     }
 
     public void runProgram(String loc) throws FileNotFoundException, IOException {

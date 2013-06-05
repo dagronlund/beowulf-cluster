@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,7 +18,7 @@ import runtime.TaskPackage;
  *
  * @author abell
  */
-public class Slave {
+public class Slave implements Runnable {
 
     public static final int FREE = 1;
     public static final int TASK_ADDED = 2;
@@ -28,68 +29,15 @@ public class Slave {
     private PacketMap map;
     private Socket socket;
     private int ping = 0;
-    private Runnable listener = new Runnable() {
-        @Override
-        public void run() {
-            while (status.get() == Network.ONLINE) {
-                if (schedule.get() == FREE) {
-                    synchronized (status) {
-                        try {
-                            socket.getOutputStream().write(Network.HEARTBEAT);
-                            long start = System.currentTimeMillis();
-                            status.set(Network.OFFLINE);
-                            while (!Network.timedOut(start) && status.get() == Network.OFFLINE) {
-                                if (socket.getInputStream().available() > 0
-                                        && socket.getInputStream().read() == Network.ACK) {
-                                    ping = (int) (System.currentTimeMillis() - start);
-                                    status.set(Network.ONLINE);
-                                }
-                            }
-                        } catch (IOException ex) {
-                        }
-                    }
-                } else if (schedule.get() == TASK_ADDED) {
-                    try {
-                        socket.getOutputStream().write(Network.TASK_READY);
-                        while (socket.getInputStream().available() < 1
-                                && socket.getInputStream().read() != Network.ACK) {
-                        }
-                        OutputStream out = socket.getOutputStream();
-                        writeString(out, task.getTaskId());
-                        writeData(out, task.getJarData());
-                        if (map != null) {
-                            writeInt(out, 1);
-                            map.send(out);
-                        } else {
-                            writeInt(out, 0);
-                        }
-                        PacketMap result = new PacketMap();
-                        result.receive(socket.getInputStream());
-                        map = result;
-                        schedule.set(TASK_COMPLETE);
-                    } catch (IOException ex) {
-                    }
-                }
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Slave.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
 
-        }
-    };
-    Thread t;
-
-    public Slave(Socket socket) throws IOException {
+    public Slave(Socket socket, Executor executor) throws IOException {
         this.socket = socket;
         if (!Network.handshake(socket)) {
             throw new IOException();
         }
         status = new AtomicInteger(Network.ONLINE);
         schedule = new AtomicInteger(FREE);
-        t = new Thread(listener);
-        t.start();
+        executor.execute(this);
     }
 
     public Socket getSocket() {
@@ -99,7 +47,7 @@ public class Slave {
     public int getStatus() {
         return status.get();
     }
-    
+
     public int getPing() {
         return ping;
     }
@@ -118,6 +66,55 @@ public class Slave {
         }
         schedule.set(FREE);
         return map;
+    }
+
+    @Override
+    public void run() {
+        while (status.get() == Network.ONLINE) {
+            if (schedule.get() == FREE) {
+                synchronized (status) {
+                    try {
+                        socket.getOutputStream().write(Network.HEARTBEAT);
+                        long start = System.currentTimeMillis();
+                        status.set(Network.OFFLINE);
+                        while (!Network.timedOut(start) && status.get() == Network.OFFLINE) {
+                            if (socket.getInputStream().available() > 0
+                                    && socket.getInputStream().read() == Network.ACK) {
+                                ping = (int) (System.currentTimeMillis() - start);
+                                status.set(Network.ONLINE);
+                            }
+                        }
+                    } catch (IOException ex) {
+                    }
+                }
+            } else if (schedule.get() == TASK_ADDED) {
+                try {
+                    socket.getOutputStream().write(Network.TASK_READY);
+                    while (socket.getInputStream().available() < 1
+                            && socket.getInputStream().read() != Network.ACK) {
+                    }
+                    OutputStream out = socket.getOutputStream();
+                    writeString(out, task.getTaskId());
+                    writeData(out, task.getJarData());
+                    if (map != null) {
+                        writeInt(out, 1);
+                        map.send(out);
+                    } else {
+                        writeInt(out, 0);
+                    }
+                    PacketMap result = new PacketMap();
+                    result.receive(socket.getInputStream());
+                    map = result;
+                    schedule.set(TASK_COMPLETE);
+                } catch (IOException ex) {
+                }
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Slave.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     @Override
